@@ -1,0 +1,525 @@
+groups:
+- name: Prometheus
+  rules:
+    - alert: PrometheusConfigurationReload
+      expr: prometheus_config_last_reload_successful != 1
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "Prometheus configuration reload (instance {{ $labels.instance }})"
+        description: "Prometheus configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: AlertmanagerConfigurationReload
+      expr: alertmanager_config_last_reload_successful != 1
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "AlertManager configuration reload (instance {{ $labels.instance }})"
+        description: "AlertManager configuration reload error\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ExporterDown
+      expr: up == 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Exporter down (instance {{ $labels.instance }})"
+        description: "Prometheus exporter down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: Host
+  rules:
+    - alert: OutOfMemory
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Out of memory (instance {{ $labels.instance }})"
+        description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualNetworkThroughputIn
+      expr: sum by (instance) (irate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual network throughput in (instance {{ $labels.instance }})"
+        description: "Host network interfaces are probably receiving too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualNetworkThroughputOut
+      expr: sum by (instance) (irate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual network throughput out (instance {{ $labels.instance }})"
+        description: "Host network interfaces are probably sending too much data (> 100 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualDiskReadRate
+      expr: sum by (instance) (irate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk read rate (instance {{ $labels.instance }})"
+        description: "Disk is probably reading too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualDiskWriteRate
+      expr: sum by (instance) (irate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk write rate (instance {{ $labels.instance }})"
+        description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: OutOfDiskSpace
+      expr: node_filesystem_free_bytes{mountpoint ="/rootfs"} / node_filesystem_size_bytes{mountpoint ="/rootfs"} * 100 < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Out of disk space (instance {{ $labels.instance }})"
+        description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: OutOfInodes
+      expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint ="/rootfs"} * 100 < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Out of inodes (instance {{ $labels.instance }})"
+        description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualDiskReadLatency
+      expr: rate(node_disk_read_time_seconds_total[1m]) / rate(node_disk_reads_completed_total[1m]) > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk read latency (instance {{ $labels.instance }})"
+        description: "Disk latency is growing (read operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: UnusualDiskWriteLatency
+      expr: rate(node_disk_write_time_seconds_total[1m]) / rate(node_disk_writes_completed_total[1m]) > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Unusual disk write latency (instance {{ $labels.instance }})"
+        description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighCpuLoad
+      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU load (instance {{ $labels.instance }})"
+        description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContextSwitching
+      expr: rate(node_context_switches_total[5m]) > 1000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Context switching (instance {{ $labels.instance }})"
+        description: "Context switching is growing on node (> 1000 / s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: SwapIsFillingUp
+      expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Swap is filling up (instance {{ $labels.instance }})"
+        description: "Swap is filling up (>80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: SystemdServiceFailed
+      expr: node_systemd_unit_state{state="failed"} == 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "SystemD service failed (instance {{ $labels.instance }})"
+        description: "Service {{ $labels.name }} failed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: Docker containers
+  rules:
+    - alert: ContainerKilled
+      expr: time() - container_last_seen > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container killed (instance {{ $labels.instance }})"
+        description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContainerCpuUsage
+      expr: (sum(rate(container_cpu_usage_seconds_total[3m])) by (ip, name) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container CPU usage (instance {{ $labels.instance }})"
+        description: "Container CPU usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContainerMemoryUsage
+      expr: (sum(container_memory_usage_bytes) by (instance) / sum(container_memory_max_usage_bytes) by (instance) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container Memory usage (instance {{ $labels.instance }})"
+        description: "Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContainerVolumeUsage
+      expr: (1 - (sum(container_fs_inodes_free) BY (ip) / sum(container_fs_inodes_total) BY (ip)) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container Volume usage (instance {{ $labels.instance }})"
+        description: "Container Volume usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContainerVolumeIoUsage
+      expr: (sum(container_fs_io_current) BY (ip, name) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container Volume IO usage (instance {{ $labels.instance }})"
+        description: "Container Volume IO usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: Nginx
+  rules:
+    - alert: HttpErrors4xx
+      expr: sum(rate(nginx_http_requests_total{status=~"^4.."}[1m])) / sum(rate(nginx_http_requests_total[1m])) * 100 > 5
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "HTTP errors 4xx (instance {{ $labels.instance }})"
+        description: "Too many HTTP requests with status 4xx (> 5%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HttpErrors5xx
+      expr: sum(rate(nginx_http_requests_total{status=~"^5.."}[1m])) / sum(rate(nginx_http_requests_total[1m])) * 100 > 5
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "HTTP errors 5xx (instance {{ $labels.instance }})"
+        description: "Too many HTTP requests with status 5xx (> 5%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: PostgreSQL
+  rules:
+    - alert: PostgresqlDown
+      expr: pg_up == 0
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "PostgreSQL down (instance {{ $labels.instance }})"
+        description: "PostgreSQL instance is down\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ReplicationLag
+      expr: pg_replication_lag > 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Replication lag (instance {{ $labels.instance }})"
+        description: "PostgreSQL replication lag is going up (> 10s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: TableNotVaccumed
+      expr: time() - pg_stat_user_tables_last_autovacuum > 60 * 60 * 24
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Table not vaccumed (instance {{ $labels.instance }})"
+        description: "Table has not been vaccum for 24 hours\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: TableNotAnalyzed
+      expr: time() - pg_stat_user_tables_last_autoanalyze > 60 * 60 * 24
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Table not analyzed (instance {{ $labels.instance }})"
+        description: "Table has not been analyzed for 24 hours\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: TooManyConnections
+      expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) > 100
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Too many connections (instance {{ $labels.instance }})"
+        description: "PostgreSQL instance has too many connections\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: NotEnoughConnections
+      expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) < 5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Not enough connections (instance {{ $labels.instance }})"
+        description: "PostgreSQL instance should have more connections (> 5)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        #   - alert: DeadLocks
+        # expr: rate(pg_stat_database_deadlocks{pg_stat_database_de}[1m]) > 0
+        # for: 5m
+        #labels:
+        #severity: warning
+        #annotations:
+        #        summary: "Dead locks (instance {{ $labels.instance }})"
+        #description: "PostgreSQL has dead-locks\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: SlowQueries
+      expr: avg(rate(pg_stat_activity_max_tx_duration{datname!~"template.*"}[1m])) BY (datname) > 60
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Slow queries (instance {{ $labels.instance }})"
+        description: "PostgreSQL executes slow queries (> 1min)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: HAProxy
+  rules:
+    - alert: HAProxyDown
+      expr: haproxy_backend_active_servers{proxy="haproxy_pool"} < 2
+      labels:
+        severity: warning
+      annotations:
+        summary: "HAProxy server are unhealthy  (instance {{ $labels.instance }})"
+        description: "HAProxy server are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: Java
+  rules:
+    - alert: JvmMemoryFillingUp
+      expr: jvm_memory_bytes_used / jvm_memory_bytes_max{area="heap"} > 0.8
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "JVM memory filling up (instance {{ $labels.instance }})"
+        description: "JVM memory is filling up (> 80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: etcd
+  rules:
+    - alert: InsufficientMembers
+      expr: count(etcd_server_id) > (count(etcd_server_id) / 2 - 1)
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "Insufficient Members (instance {{ $labels.instance }})"
+        description: "Etcd cluster should have an odd number of members\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: NoLeader
+      expr: etcd_server_has_leader == 0
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "No Leader (instance {{ $labels.instance }})"
+        description: "Etcd cluster have no leader\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfLeaderChanges
+      expr: increase(etcd_server_leader_changes_seen_total[1h]) > 3
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High number of leader changes (instance {{ $labels.instance }})"
+        description: "Etcd leader changed more than 3 times during last hour\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfFailedGrpcRequests
+      expr: sum(rate(grpc_server_handled_total{grpc_code!="OK"}[5m])) BY (grpc_service, grpc_method) / sum(rate(grpc_server_handled_total[5m])) BY (grpc_service, grpc_method) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High number of failed GRPC requests (instance {{ $labels.instance }})"
+        description: "More than 1% GRPC request failure detected in Etcd for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfFailedGrpcRequests
+      expr: sum(rate(grpc_server_handled_total{grpc_code!="OK"}[5m])) BY (grpc_service, grpc_method) / sum(rate(grpc_server_handled_total[5m])) BY (grpc_service, grpc_method) > 0.05
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "High number of failed GRPC requests (instance {{ $labels.instance }})"
+        description: "More than 5% GRPC request failure detected in Etcd for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: GrpcRequestsSlow
+      expr: histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{grpc_type="unary"}[5m])) by (grpc_service, grpc_method, le)) > 0.15
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "GRPC requests slow (instance {{ $labels.instance }})"
+        description: "GRPC requests slowing down, 99th percentil is over 0.15s for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfFailedHttpRequests
+      expr: sum(rate(etcd_http_failed_total[5m])) BY (method) / sum(rate(etcd_http_received_total[5m])) BY (method) > 0.01
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High number of failed HTTP requests (instance {{ $labels.instance }})"
+        description: "More than 1% HTTP failure detected in Etcd for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfFailedHttpRequests
+      expr: sum(rate(etcd_http_failed_total[5m])) BY (method) / sum(rate(etcd_http_received_total[5m])) BY (method) > 0.05
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "High number of failed HTTP requests (instance {{ $labels.instance }})"
+        description: "More than 5% HTTP failure detected in Etcd for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HttpRequestsSlow
+      expr: histogram_quantile(0.99, rate(etcd_http_successful_duration_seconds_bucket[5m])) > 0.15
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "HTTP requests slow (instance {{ $labels.instance }})"
+        description: "HTTP requests slowing down, 99th percentil is over 0.15s for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: EtcdMemberCommunicationSlow
+      expr: histogram_quantile(0.99, rate(etcd_network_peer_round_trip_time_seconds_bucket[5m])) > 0.15
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Etcd member communication slow (instance {{ $labels.instance }})"
+        description: "Etcd member communication slowing down, 99th percentil is over 0.15s for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighNumberOfFailedProposals
+      expr: increase(etcd_server_proposals_failed_total[1h]) > 5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High number of failed proposals (instance {{ $labels.instance }})"
+        description: "Etcd server got more than 5 failed proposals past hour\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighFsyncDurations
+      expr: histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket[5m])) > 0.5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High fsync durations (instance {{ $labels.instance }})"
+        description: "Etcd WAL fsync duration increasing, 99th percentil is over 0.5s for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HighCommitDurations
+      expr: histogram_quantile(0.99, rate(etcd_disk_backend_commit_duration_seconds_bucket[5m])) > 0.25
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High commit durations (instance {{ $labels.instance }})"
+        description: "Etcd commit duration increasing, 99th percentil is over 0.25s for 5 minutes\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: etcdInsufficientMembers
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": insufficient members ({{ $value }}).'
+      expr: sum(up{job=~".*etcd.*"} == bool 1) by (job) < ((count(up{job=~".*etcd.*"}) by (job) + 1) / 2)
+      for: 3m
+      labels:
+        severity: critical
+    - alert: etcdNoLeader
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": member {{ $labels.instance }} has no leader.'
+      expr: etcd_server_has_leader{job=~".*etcd.*"} == 0
+      for: 1m
+      labels:
+        severity: critical
+    - alert: etcdHighNumberOfLeaderChanges
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": instance {{ $labels.instance }} has seen {{ $value }} leader changes within the last hour.'
+      expr: rate(etcd_server_leader_changes_seen_total{job=~".*etcd.*"}[15m]) > 3
+      for: 15m
+      labels:
+        severity: warning
+    - alert: etcdHighNumberOfFailedGRPCRequests
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": {{ $value }}% of requests for {{ $labels.grpc_method }} failed on etcd instance {{ $labels.instance }}.'
+      expr: 100 * sum(rate(grpc_server_handled_total{job=~".*etcd.*", grpc_code!="OK"}[5m])) BY (job, instance, grpc_service, grpc_method) / sum(rate(grpc_server_handled_total{job=~".*etcd.*"}[5m])) BY (job, instance, grpc_service, grpc_method) > 1
+      for: 10m
+      labels:
+        severity: warning
+    - alert: etcdHighNumberOfFailedGRPCRequests
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": {{ $value }}% of requests for {{ $labels.grpc_method }} failed on etcd instance {{ $labels.instance }}.'
+      expr: 100 * sum(rate(grpc_server_handled_total{job=~".*etcd.*", grpc_code!="OK"}[5m])) BY (job, instance, grpc_service, grpc_method) / sum(rate(grpc_server_handled_total{job=~".*etcd.*"}[5m])) BY (job, instance, grpc_service, grpc_method) > 5
+      for: 5m
+      labels:
+        severity: critical
+    - alert: etcdGRPCRequestsSlow
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": gRPC requests to {{ $labels.grpc_method }} are taking {{ $value }}s on etcd instance {{ $labels.instance }}.'
+      expr: histogram_quantile(0.99, sum(rate(grpc_server_handling_seconds_bucket{job=~".*etcd.*", grpc_type="unary"}[5m])) by (job, instance, grpc_service, grpc_method, le)) > 0.15
+      for: 10m
+      labels:
+        severity: critical
+    - alert: etcdMemberCommunicationSlow
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": member communication with {{ $labels.To }} is taking {{ $value }}s on etcd instance {{ $labels.instance }}.'
+      expr: histogram_quantile(0.99, rate(etcd_network_peer_round_trip_time_seconds_bucket{job=~".*etcd.*"}[5m])) > 0.15
+      for: 10m
+      labels:
+        severity: warning
+    - alert: etcdHighNumberOfFailedProposals
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": {{ $value }} proposal failures within the last hour on etcd instance {{ $labels.instance }}.'
+      expr: rate(etcd_server_proposals_failed_total{job=~".*etcd.*"}[15m]) > 5
+      for: 15m
+      labels:
+        severity: warning
+    - alert: etcdHighFsyncDurations
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": 99th percentile fync durations are {{ $value }}s on etcd instance {{ $labels.instance }}.'
+      expr: histogram_quantile(0.99, rate(etcd_disk_wal_fsync_duration_seconds_bucket{job=~".*etcd.*"}[5m])) > 0.5
+      for: 10m
+      labels:
+        severity: warning
+    - alert: etcdHighCommitDurations
+      annotations:
+        summary: 'etcd cluster "{{ $labels.job }}": 99th percentile commit durations {{ $value }}s on etcd instance {{ $labels.instance }}.'
+      expr: histogram_quantile(0.99, rate(etcd_disk_backend_commit_duration_seconds_bucket{job=~".*etcd.*"}[5m])) > 0.25
+      for: 10m
+      labels:
+        severity: warning
+    - alert: etcdHighNumberOfFailedHTTPRequests
+      annotations:
+        summary: '{{ $value }}% of requests for {{ $labels.method }} failed on etcd instance {{ $labels.instance }}'
+      expr: sum(rate(etcd_http_failed_total{job=~".*etcd.*", code!="404"}[5m])) BY (method) / sum(rate(etcd_http_received_total{job=~".*etcd.*"}[5m])) BY (method) > 0.01
+      for: 10m
+      labels:
+        severity: warning
+    - alert: etcdHighNumberOfFailedHTTPRequests
+      annotations:
+        summary: '{{ $value }}% of requests for {{ $labels.method }} failed on etcd instance {{ $labels.instance }}.'
+      expr: sum(rate(etcd_http_failed_total{job=~".*etcd.*", code!="404"}[5m])) BY (method) / sum(rate(etcd_http_received_total{job=~".*etcd.*"}[5m])) BY (method) > 0.05
+      for: 10m
+      labels:
+        severity: critical
+    - alert: etcdHTTPRequestsSlow
+      annotations:
+        summary: 'etcd instance {{ $labels.instance }} HTTP requests to {{ $labels.method }} are slow.'
+      expr: histogram_quantile(0.99, rate(etcd_http_successful_duration_seconds_bucket[5m])) > 0.15
+      for: 10m
+      labels:
+        severity: warning
+- name: Blackbox
+  rules:
+    - alert: ProbeFailed
+      expr: probe_success == 0
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "Probe failed (instance {{ $labels.instance }})"
+        description: "Probe failed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: StatusCode
+      expr: probe_http_status_code <= 199 OR probe_http_status_code >= 400
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "Status Code (instance {{ $labels.instance }})"
+        description: "HTTP status code is not 200-399\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: SslCertificateWillExpireSoon
+      expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "SSL certificate will expire soon (instance {{ $labels.instance }})"
+        description: "SSL certificate expires in 30 days\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: SslCertificateHasExpired
+      expr: probe_ssl_earliest_cert_expiry - time()  <= 0
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "SSL certificate has expired (instance {{ $labels.instance }})"
+        description: "SSL certificate has expired already\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: BlackboxSlowRequests
+      expr: probe_http_duration_seconds > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Blackbox slow requests (instance {{ $labels.instance }})"
+        description: "Blackbox request took more than 2s\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: BlackboxSlowPing
+      expr: probe_icmp_duration_seconds > 2
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Blackbox slow ping (instance {{ $labels.instance }})"
+        description: "Blackbox ping took more than 2s\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

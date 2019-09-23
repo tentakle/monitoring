@@ -1,0 +1,95 @@
+version: '3.7'
+services:
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:latest
+    ports:
+    - published: 9093
+      target: 9093
+    restart: unless-stopped
+    volumes:
+    - ./alertmanager:/etc/alertmanager:rw
+  alertmanager-bot:
+    container_name: alertmanager-bot
+    environment:
+      ALERTMANAGER_URL: http://192.168.122.90:9093
+      BOLT_PATH: /tmp/bot.db
+      LISTEN_ADDR: 0.0.0.0:8500
+      STORE: bolt
+      TELEGRAM_ADMIN: $TELEGRAM_ADMIN
+      TELEGRAM_TOKEN: $TELEGRAM_TOKEN
+      TEMPLATE_PATHS: /templates/default.tmpl
+      http_proxy: http://10.69.0.50:3128
+      https_proxy: http://10.69.0.50:3128
+    image: metalmatze/alertmanager-bot:latest
+    ports:
+    - published: 8080
+      target: 8080
+    restart: unless-stopped
+    volumes:
+    - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl:rw
+  blackbox_exporter:
+    container_name: blackbox_exporter
+    image: prom/blackbox-exporter:latest
+    ports:
+    - published: 9115
+      target: 9115
+    restart: unless-stopped
+    volumes:
+    - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:rw
+  cadvisor:
+    container_name: cadvisor
+    image: google/cadvisor:latest
+    ports:
+    - published: 8081
+      target: 8080
+    restart: unless-stopped
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker:/var/lib/docker:ro
+  grafana:
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      http_proxy: http://10.69.0.50:3128
+      https_proxy: http://10.69.0.50:3128
+    image: grafana/grafana:latest
+    ports:
+    - published: 3000
+      target: 3000
+    restart: unless-stopped
+    user: '1000'
+    volumes:
+    - ./grafana:/var/lib/grafana:rw
+  node-exporter:
+    command:
+    - --path.procfs=/host/proc
+    - --path.sysfs=/host/sys
+    - --path.rootfs=/rootfs
+    - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
+    container_name: node-exporter
+    image: prom/node-exporter:latest
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+    - /proc:/host/proc:rw
+    - /sys:/host/sys:rw
+    - /:/rootfs:rw
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    ports:
+    - published: 9090
+      target: 9090
+    restart: unless-stopped
+    volumes:
+    - ./prometheus:/etc/prometheus:rw
+  snmp_exporter:
+    container_name: snmp_exporter
+    image: prom/snmp-exporter:latest
+    ports:
+    - published: 9116
+      target: 9116
+    restart: unless-stopped
