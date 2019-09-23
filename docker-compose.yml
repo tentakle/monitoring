@@ -93,3 +93,24 @@ services:
     - published: 9116
       target: 9116
     restart: unless-stopped
+  influxdb:
+    container_name: influxdb
+    image: influxdb:latest
+    restart: unless-stopped
+    environment:
+      INFLUXDB_ADMIN_ENABLED: 'true'
+    ports:
+      - "8083:8083"
+      - "8086:8086"
+  telegraf:
+    container_name: telegraf
+    image: telegraf:latest
+    restart: unless-stopped
+    environment:
+      HOST_PROC: /host/proc
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /proc:/host/proc:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "9273:9273"
