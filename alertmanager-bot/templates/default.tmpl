@@ -3,7 +3,6 @@
 {{ if eq .Status "firing" }} <b>🔥 {{.Status | toUpper }} 🔥</b> {{ else }} <b>✅ {{.Status | toUpper}} ✅</b> {{ end }}
 {{ .Annotations.summary }}
 {{ .Annotations.description }}
-<b>Duration:</b> {{ duration .StartsAt .EndsAt }}{{ if ne .Status "firing"}}
-<b>Ended:</b> {{ .EndsAt | since }}{{ end }}
+{{ if ne .Status "firing"}}<b>Duration:</b> {{ duration .StartsAt .EndsAt }} {{ end }}
 {{ end }}
 {{ end }}
