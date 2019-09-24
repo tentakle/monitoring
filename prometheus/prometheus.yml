@@ -1,5 +1,5 @@
 global:
-  scrape_interval:     5s
+  scrape_interval: 5s
   evaluation_interval: 15s
 
 alerting:
@@ -9,49 +9,62 @@ alerting:
       - 192.168.122.90:9093
 
 rule_files:
-  - 'alerts.yml'
+  - alerts/blackbox.yml
+  - alerts/docker.yml
+  - alerts/etcd.yml
+  - alerts/haproxy.yml
+  - alerts/host.yml
+  - alerts/java.yml
+  - alerts/nginx.yml 
+  - alerts/postgresql.yml
+  - alerts/prometheus.yml
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: prometheus
     static_configs:
-    - targets: ['192.168.122.90:9090']
+    - targets:
+      - 192.168.122.90:9090
       labels:
-        instance: 'prometheus'
-    - targets: ['192.168.122.90:9115']
+        instance: prometheus
+
+  - job_name: blackbox
+    static_configs:
+    - targets: 
+      - 192.168.122.90:9115
       labels:
-        instance: 'blackbox'
+        instance: blackbox
  
-  - job_name: 'haproxy'
+  - job_name: haproxy
     file_sd_configs:
       - files:
         - haproxy.json
     
-  - job_name: 'node'
+  - job_name: node
     file_sd_configs:
       - files:
         - node.json
 
-  - job_name: 'cadvisor'
+  - job_name: cadvisor
     file_sd_configs:
       - files:
         - cadvisor.json
 
-  - job_name: 'etcd'
+  - job_name: etcd
     file_sd_configs:
       - files:
         - etcd.json
 
-  - job_name: 'java'
+  - job_name: java
     file_sd_configs:
       - files:
         - java.json
 
-  - job_name: 'postgres'
+  - job_name: postgres
     file_sd_configs:
       - files:
         - postgres.json
 
-  - job_name: 'http_2xx'
+  - job_name: http_2xx
     metrics_path: /probe
     params:
       module: [http_2xx]
@@ -66,7 +79,7 @@ scrape_configs:
       - target_label: __address__
         replacement: 192.168.122.90:9115
 
-  - job_name: 'icmp'
+  - job_name: icmp
     metrics_path: /probe
     params:
       module: [icmp]
@@ -81,7 +94,7 @@ scrape_configs:
       - target_label: __address__
         replacement: 192.168.122.90:9115
 
-  - job_name: 'snmp'
+  - job_name: snmp
     metrics_path: /snmp
     params:
       module: [if_mib]

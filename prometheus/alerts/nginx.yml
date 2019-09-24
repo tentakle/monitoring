@@ -1,0 +1,19 @@
+groups:
+- name: Nginx
+  rules:
+    - alert: HttpErrors4xx
+      expr: sum(rate(nginx_http_requests_total{status=~"^4.."}[1m])) / sum(rate(nginx_http_requests_total[1m])) * 100 > 5
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "HTTP errors 4xx (instance {{ $labels.instance }})"
+        description: "Too many HTTP requests with status 4xx (> 5%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: HttpErrors5xx
+      expr: sum(rate(nginx_http_requests_total{status=~"^5.."}[1m])) / sum(rate(nginx_http_requests_total[1m])) * 100 > 5
+      for: 5m
+      labels:
+        severity: error
+      annotations:
+        summary: "HTTP errors 5xx (instance {{ $labels.instance }})"
+        description: "Too many HTTP requests with status 5xx (> 5%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
