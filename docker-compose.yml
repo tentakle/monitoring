@@ -4,8 +4,7 @@ services:
     container_name: alertmanager
     image: prom/alertmanager:latest
     ports:
-    - published: 9093
-      target: 9093
+      - "9093:9093"
     restart: unless-stopped
     volumes:
     - ./alertmanager:/etc/alertmanager:rw
@@ -23,8 +22,7 @@ services:
       https_proxy: http://10.69.0.50:3128
     image: metalmatze/alertmanager-bot:latest
     ports:
-    - published: 8080
-      target: 8080
+      - "8080:8080"
     restart: unless-stopped
     volumes:
     - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl:rw
@@ -32,8 +30,7 @@ services:
     container_name: blackbox_exporter
     image: prom/blackbox-exporter:latest
     ports:
-    - published: 9115
-      target: 9115
+      - "9115:9115"
     restart: unless-stopped
     volumes:
     - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:rw
@@ -41,8 +38,7 @@ services:
     container_name: cadvisor
     image: google/cadvisor:latest
     ports:
-    - published: 8081
-      target: 8080
+      - "8081:8080"
     restart: unless-stopped
     volumes:
     - /:/rootfs:ro
@@ -57,8 +53,7 @@ services:
       https_proxy: http://10.69.0.50:3128
     image: grafana/grafana:latest
     ports:
-    - published: 3000
-      target: 3000
+      - "3000:3000"
     restart: unless-stopped
     user: '1000'
     volumes:
@@ -81,8 +76,7 @@ services:
     container_name: prometheus
     image: prom/prometheus:latest
     ports:
-    - published: 9090
-      target: 9090
+      - "9090:9090"
     restart: unless-stopped
     volumes:
     - ./prometheus:/etc/prometheus:rw
@@ -90,6 +84,5 @@ services:
     container_name: snmp_exporter
     image: prom/snmp-exporter:latest
     ports:
-    - published: 9116
-      target: 9116
+      - "9116:9116"
     restart: unless-stopped
