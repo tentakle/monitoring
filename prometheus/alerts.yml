@@ -276,6 +276,89 @@ groups:
       annotations:
         summary: "JVM memory filling up (instance {{ $labels.instance }})"
         description: "JVM memory is filling up (> 80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+- name: jvm-alerting
+  rules:
+    # down for more than 30 seconds
+    - alert: instance-down
+      expr: up == 0
+      for: 30s
+      labels:
+        severity: yellow
+      annotations:
+        summary: "Instance {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 30 seconds."
+    # down for more than a minute
+    - alert: instance-down
+      expr: up == 0
+      for: 1m
+      labels:
+        severity: orange
+      annotations:
+        summary: "Instance {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
+    # down for more than five minutes
+    - alert: instance-down
+      expr: up == 0
+      for: 5m
+      labels:
+        severity: blue
+      annotations:
+        summary: "Instance {{ $labels.instance }} down"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+    # Over 50% heap space usage
+    - alert: heap-usage-too-much
+      expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 50
+      for: 1m
+      labels:
+        severity: yellow
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} memory usage > 50%"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 50%] for more than 1 minutes. current usage ({{ $value }}%)"
+    # Over 80% heap space usage
+    - alert: heap-usage-too-much
+      expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 80
+      for: 1m
+      labels:
+        severity: orange
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} memory usage > 80%"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 80%] for more than 1 minutes. current usage ({{ $value }}%)"
+    # Over 90% heap space usage
+    - alert: heap-usage-too-much
+      expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 90
+      for: 1m
+      labels:
+        severity: red
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} memory usage > 90%"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 90%] for more than 1 minutes. current usage ({{ $value }}%)"
+    # Old GC takes more than 30% of its time in five minutes.
+    - alert: old-gc-time-too-much
+      expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.3
+      for: 5m
+      labels:
+        severity: yellow
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} Old GC time > 30% running time"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 30% running time] for more than 5 minutes. current seconds ({{ $value }}%)"
+    # In five minutes, Old GC takes more than 50% of its time.        
+    - alert: old-gc-time-too-much
+      expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.5
+      for: 5m
+      labels:
+        severity: orange
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} Old GC time > 50% running time"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 50% running time] for more than 5 minutes. current seconds ({{ $value }}%)"
+    # Old GC takes more than 80% of its time in five minutes.
+    - alert: old-gc-time-too-much
+      expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.8
+      for: 5m
+      labels:
+        severity: red
+      annotations:
+        summary: "JVM Instance {{ $labels.instance }} Old GC time > 80% running time"
+        description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 80% running time] for more than 5 minutes. current seconds ({{ $value }}%)"
 - name: etcd
   rules:
     - alert: InsufficientMembers

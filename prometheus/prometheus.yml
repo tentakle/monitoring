@@ -20,12 +20,6 @@ scrape_configs:
     - targets: ['192.168.122.90:9115']
       labels:
         instance: 'blackbox'
-
-  - job_name: 'telegraf'
-    static_configs:
-    - targets: ['192.168.122.90:9273']
-      labels:
-        instance: 'telegraf'
  
   - job_name: 'haproxy'
     file_sd_configs:
@@ -46,6 +40,11 @@ scrape_configs:
     file_sd_configs:
       - files:
         - etcd.json
+
+  - job_name: 'java'
+    file_sd_configs:
+      - files:
+        - java.json
 
   - job_name: 'postgres'
     file_sd_configs:
