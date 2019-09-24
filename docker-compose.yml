@@ -4,11 +4,10 @@ services:
     container_name: alertmanager
     image: prom/alertmanager:latest
     ports:
-    - published: 9093
-      target: 9093
+      - "9093:9093"
     restart: unless-stopped
     volumes:
-    - ./alertmanager:/etc/alertmanager:rw
+      - ./alertmanager:/etc/alertmanager:rw
   alertmanager-bot:
     container_name: alertmanager-bot
     environment:
@@ -23,32 +22,29 @@ services:
       https_proxy: http://10.69.0.50:3128
     image: metalmatze/alertmanager-bot:latest
     ports:
-    - published: 8080
-      target: 8080
+      - "8080:8080"
     restart: unless-stopped
     volumes:
-    - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl:rw
+      - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl:rw
   blackbox_exporter:
     container_name: blackbox_exporter
     image: prom/blackbox-exporter:latest
     ports:
-    - published: 9115
-      target: 9115
+      - "9115:9115"
     restart: unless-stopped
     volumes:
-    - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:rw
+      - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:rw
   cadvisor:
     container_name: cadvisor
     image: google/cadvisor:latest
     ports:
-    - published: 8081
-      target: 8080
+      - "8081:8080"
     restart: unless-stopped
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker:/var/lib/docker:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
   grafana:
     container_name: grafana
     environment:
@@ -57,60 +53,36 @@ services:
       https_proxy: http://10.69.0.50:3128
     image: grafana/grafana:latest
     ports:
-    - published: 3000
-      target: 3000
+      - "3000:3000"
     restart: unless-stopped
     user: '1000'
     volumes:
-    - ./grafana:/var/lib/grafana:rw
+      - ./grafana:/var/lib/grafana:rw
   node-exporter:
     command:
-    - --path.procfs=/host/proc
-    - --path.sysfs=/host/sys
-    - --path.rootfs=/rootfs
-    - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+      - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
     container_name: node-exporter
     image: prom/node-exporter:latest
     network_mode: host
     restart: unless-stopped
     volumes:
-    - /proc:/host/proc:rw
-    - /sys:/host/sys:rw
-    - /:/rootfs:rw
+      - /proc:/host/proc:rw
+      - /sys:/host/sys:rw
+      - /:/rootfs:rw
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
     ports:
-    - published: 9090
-      target: 9090
+      - "9090:9090"
     restart: unless-stopped
     volumes:
-    - ./prometheus:/etc/prometheus:rw
+      - ./prometheus:/etc/prometheus:rw
   snmp_exporter:
     container_name: snmp_exporter
     image: prom/snmp-exporter:latest
     ports:
-    - published: 9116
-      target: 9116
+      - "9116:9116"
     restart: unless-stopped
-  influxdb:
-    container_name: influxdb
-    image: influxdb:latest
-    restart: unless-stopped
-    environment:
-      INFLUXDB_ADMIN_ENABLED: 'true'
-    ports:
-      - "8083:8083"
-      - "8086:8086"
-  telegraf:
-    container_name: telegraf
-    image: telegraf:latest
-    restart: unless-stopped
-    environment:
-      HOST_PROC: /host/proc
-    volumes:
-      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
-      - /proc:/host/proc:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    ports:
-      - "9273:9273"
