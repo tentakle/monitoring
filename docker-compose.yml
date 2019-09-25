@@ -51,8 +51,6 @@ services:
     container_name: grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
-      http_proxy: http://10.69.0.50:3128
-      https_proxy: http://10.69.0.50:3128
     image: grafana/grafana:latest
     ports:
       - "3000:3000"
@@ -88,3 +86,19 @@ services:
     ports:
       - "9116:9116"
     restart: unless-stopped
+  loki:
+    container_name: loki
+    image: grafana/loki:latest
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    volumes:
+      - ./promtail/docker-config.yaml:/etc/promtail/docker-config.yaml
+      - /etc/machine-id:/etc/machine-id
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/docker-config.yaml
