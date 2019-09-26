@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  cadvisor:
+    container_name: postgres_exporter
+    image: wrouesnel/postgres_exporter:latest
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://postgres:postgres@192.168.122.122:5000/postgres?sslmode=disable
+    ports:
+      - "9187:9187"
