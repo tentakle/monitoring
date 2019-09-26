@@ -4,72 +4,58 @@ global:
 
 alerting:
   alertmanagers:
-  - static_configs:
-    - targets:
-      - 192.168.122.90:9093
+  - file_sd_configs:
+    - files:
+      - file_sd_configs/alertmanagers.json
 
 rule_files:
-  - alerts/blackbox.yml
-  - alerts/docker.yml
-  - alerts/etcd.yml
-  - alerts/haproxy.yml
-  - alerts/host.yml
-  - alerts/java.yml
-  - alerts/nginx.yml 
-  - alerts/postgresql.yml
-  - alerts/prometheus.yml
+  - alerts/*.yml
 
 scrape_configs:
   - job_name: prometheus
-    static_configs:
-    - targets:
-      - 192.168.122.90:9090
-      labels:
-        instance: prometheus
+    file_sd_configs:
+      - files:
+        - file_sd_configs/prometheus.json
 
   - job_name: loki
-    static_configs:
-    - targets:
-      - 192.168.122.90:3100
-      labels:
-        instance: loki
+    file_sd_configs:
+      - files:
+        - file_sd_configs/loki.json
 
   - job_name: blackbox
-    static_configs:
-    - targets: 
-      - 192.168.122.90:9115
-      labels:
-        instance: blackbox
+    file_sd_configs:
+      - files:
+        - file_sd_configs/blackbox.json
  
   - job_name: haproxy
     file_sd_configs:
       - files:
-        - haproxy.json
+        - file_sd_configs/haproxy.json
     
   - job_name: node
     file_sd_configs:
       - files:
-        - node.json
+        - file_sd_configs/node.json
 
   - job_name: cadvisor
     file_sd_configs:
       - files:
-        - cadvisor.json
+        - file_sd_configs/cadvisor.json
 
   - job_name: etcd
     file_sd_configs:
       - files:
-        - etcd.json
+        - file_sd_configs/etcd.json
 
   - job_name: java
     file_sd_configs:
       - files:
-        - java.json
+        - file_sd_configs/java.json
 
   - job_name: postgres
     file_sd_configs:
       - files:
-        - postgres.json
+        - file_sd_configs/postgres.json
 
   - job_name: http_2xx
     metrics_path: /probe
@@ -77,7 +63,7 @@ scrape_configs:
       module: [http_2xx]
     file_sd_configs:
       - files:
-        - http_2xx.json
+        - file_sd_configs/http_2xx.json
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -92,7 +78,7 @@ scrape_configs:
       module: [icmp]
     file_sd_configs:
       - files:
-        - icmp.json
+        - file_sd_configs/icmp.json
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -107,7 +93,7 @@ scrape_configs:
       module: [if_mib]
     file_sd_configs:
       - files:
-        - snmp.json
+        - file_sd_configs/snmp.json
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

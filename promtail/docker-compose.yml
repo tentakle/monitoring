@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  promtail:
+    container_name: promtail
+    image: grafana/promtail:latest
+    restart: unless-stopped
+    volumes:
+      - ./docker-config.yaml:/etc/promtail/docker-config.yaml
+      - /etc/machine-id:/etc/machine-id
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/docker-config.yaml

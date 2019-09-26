@@ -1,0 +1,8 @@
+[
+  {
+    "targets": [ "192.168.122.90:9090" ],
+    "labels": {
+      "instance": "prometheus"
+    }
+  }
+]

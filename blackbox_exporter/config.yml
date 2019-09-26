@@ -15,3 +15,7 @@ modules:
     prober: icmp
     icmp:
       preferred_ip_protocol: "ip4"
+  wsdl:
+    prober: http
+    http:
+      body: <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://eaisbu.aisa.ru/requestNsi" version="1.0">

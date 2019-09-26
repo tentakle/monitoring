@@ -81,14 +81,14 @@ groups:
       annotations:
         summary: "High CPU load (instance {{ $labels.instance }})"
         description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-    - alert: ContextSwitching
-      expr: rate(node_context_switches_total[5m]) > 1000
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "Context switching (instance {{ $labels.instance }})"
-        description: "Context switching is growing on node (> 1000 / s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        #    - alert: ContextSwitching
+        #      expr: rate(node_context_switches_total[5m]) > 1000
+        #      for: 5m
+        #      labels:
+        #        severity: warning
+        #      annotations:
+        #        summary: "Context switching (instance {{ $labels.instance }})"
+        #        description: "Context switching is growing on node (> 1000 / s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: SwapIsFillingUp
       expr: (1 - (node_memory_SwapFree_bytes / node_memory_SwapTotal_bytes)) * 100 > 80
       for: 5m

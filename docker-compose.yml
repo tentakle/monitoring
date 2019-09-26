@@ -34,19 +34,6 @@ services:
     restart: unless-stopped
     volumes:
     - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml:rw
-  cadvisor:
-    container_name: cadvisor
-    image: google/cadvisor:latest
-    privileged: true
-    ports:
-      - "8081:8080"
-    restart: unless-stopped
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
   grafana:
     container_name: grafana
     environment:
@@ -58,20 +45,6 @@ services:
     user: '1000'
     volumes:
     - ./grafana:/var/lib/grafana:rw
-  node-exporter:
-    command:
-    - --path.procfs=/host/proc
-    - --path.sysfs=/host/sys
-    - --path.rootfs=/rootfs
-    - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
-    container_name: node-exporter
-    image: prom/node-exporter:latest
-    network_mode: host
-    restart: unless-stopped
-    volumes:
-    - /proc:/host/proc:rw
-    - /sys:/host/sys:rw
-    - /:/rootfs:rw
   prometheus:
     container_name: prometheus
     image: prom/prometheus:latest
@@ -93,12 +66,3 @@ services:
     ports:
       - "3100:3100"
     command: -config.file=/etc/loki/local-config.yaml
-  promtail:
-    container_name: promtail
-    image: grafana/promtail:latest
-    restart: unless-stopped
-    volumes:
-      - ./promtail/docker-config.yaml:/etc/promtail/docker-config.yaml
-      - /etc/machine-id:/etc/machine-id
-      - /var/log:/var/log
-    command: -config.file=/etc/promtail/docker-config.yaml
