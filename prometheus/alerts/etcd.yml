@@ -1,6 +1,22 @@
 groups:
 - name: etcd
   rules:
+    - alert: etcdInstanceDown
+      expr: up{job="etcd"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "etcd down (instance {{ $labels.instance }})"
+        description: "etcd unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: etcdMissing
+      expr: absent(up{job="etcd"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "etcd is missing (instance {{ $labels.instance }})"
+        description: "etcd are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: InsufficientMembers
       expr: count(etcd_server_id) > (count(etcd_server_id) / 2 - 1)
       for: 5m
@@ -10,7 +26,7 @@ groups:
         summary: "Insufficient Members (instance {{ $labels.instance }})"
         description: "Etcd cluster should have an odd number of members\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: NoLeader
-      expr: etcd_server_has_leader == 0
+      expr: etcd_server_has_leader{job!="loki"} == 0
       for: 5m
       labels:
         severity: error

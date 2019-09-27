@@ -1,6 +1,22 @@
 groups:
 - name: Blackbox
   rules:
+    - alert: BlackboxInstanceDown
+      expr: up{job="blackbox"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Blackbox down (instance {{ $labels.instance }})"
+        description: "Blackbox are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: BlackboxMissing
+      expr: absent(up{job="blackbox"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Blackbox is missing (instance {{ $labels.instance }})"
+        description: "Blackbox server are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: ProbeFailed
       expr: probe_success == 0
       for: 5m

@@ -1,6 +1,22 @@
 groups:
 - name: PostgreSQL
   rules:
+    - alert: PostgresInstanceDown
+      expr: up{job="postgres"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Postgres down (instance {{ $labels.instance }})"
+        description: "Postgres unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: PostgresMissing
+      expr: absent(up{job="postgres"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Postgres is missing (instance {{ $labels.instance }})"
+        description: "Postgres are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: PostgresqlDown
       expr: pg_up == 0
       for: 5m
@@ -41,14 +57,14 @@ groups:
       annotations:
         summary: "Too many connections (instance {{ $labels.instance }})"
         description: "PostgreSQL instance has too many connections\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-    - alert: NotEnoughConnections
-      expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) < 5
-      for: 5m
-      labels:
-        severity: warning
-      annotations:
-        summary: "Not enough connections (instance {{ $labels.instance }})"
-        description: "PostgreSQL instance should have more connections (> 5)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+        #    - alert: NotEnoughConnections
+        #      expr: sum by (datname) (pg_stat_activity_count{datname!~"template.*|postgres"}) < 5
+        #      for: 5m
+        #      labels:
+        #        severity: warning
+        #      annotations:
+        #        summary: "Not enough connections (instance {{ $labels.instance }})"
+        #        description: "PostgreSQL instance should have more connections (> 5)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
         #   - alert: DeadLocks
         # expr: rate(pg_stat_database_deadlocks{pg_stat_database_de}[1m]) > 0
         # for: 5m

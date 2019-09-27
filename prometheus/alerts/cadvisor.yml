@@ -1,6 +1,22 @@
 groups:
 - name: Docker containers
   rules:
+    - alert: CadvisorInstanceDown
+      expr: up{job="cadvisor"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Cadvisor down (instance {{ $labels.instance }})"
+        description: "Cadvisor unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: CadvisorMissing
+      expr: absent(up{job="cadvisor"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Cadvisor is missing (instance {{ $labels.instance }})"
+        description: "Cadvisor are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: ContainerKilled
       expr: time() - container_last_seen > 60
       for: 5m

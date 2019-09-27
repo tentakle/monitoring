@@ -3,6 +3,7 @@
 {{ if eq .Status "firing" }} <b>🔥 {{ .Status | toUpper }}: {{ .Labels.severity | toUpper }} 🔥</b> {{ else }} <b>✅ {{ .Status | toUpper}} ✅</b> {{ end }}
 {{ .Annotations.summary }}
 {{ .Annotations.description }}
+{{ .GeneratorURL }}
 {{ if eq .Status "firing"}} <b>Started:</b> {{ .StartsAt | since }} ago {{else}} <b>Duration:</b> {{ duration .StartsAt .EndsAt }} {{ end }}
 {{ end }}
 {{ end }}

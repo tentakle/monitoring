@@ -1,6 +1,22 @@
 groups:
 - name: Java
   rules:
+    - alert: JavaInstanceDown
+      expr: up{job="java"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Java down (instance {{ $labels.instance }})"
+        description: "Java unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: JavaMissing
+      expr: absent(up{job="java"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Java is missing (instance {{ $labels.instance }})"
+        description: "Java are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: JvmMemoryFillingUp
       expr: jvm_memory_bytes_used / jvm_memory_bytes_max{area="heap"} > 0.8
       for: 5m
@@ -9,75 +25,51 @@ groups:
       annotations:
         summary: "JVM memory filling up (instance {{ $labels.instance }})"
         description: "JVM memory is filling up (> 80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-    - alert: instance-down
-      expr: up{job="java"} == 0
-      for: 30s
-      labels:
-        severity: yellow
-      annotations:
-        summary: "Instance {{ $labels.instance }} down"
-        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 30 seconds."
-    - alert: instance-down
-      expr: up{job="java"} == 0
-      for: 1m
-      labels:
-        severity: orange
-      annotations:
-        summary: "Instance {{ $labels.instance }} down"
-        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
-    - alert: instance-down
-      expr: up{job="java"} == 0
-      for: 5m
-      labels:
-        severity: blue
-      annotations:
-        summary: "Instance {{ $labels.instance }} down"
-        description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
-    - alert: heap-usage-too-much
+    - alert: HeapUsageTooMuch
       expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 50
       for: 1m
       labels:
-        severity: yellow
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} memory usage > 50%"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 50%] for more than 1 minutes. current usage ({{ $value }}%)"
-    - alert: heap-usage-too-much
+    - alert: HeapUsageTooMuch
       expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 80
       for: 1m
       labels:
-        severity: orange
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} memory usage > 80%"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 80%] for more than 1 minutes. current usage ({{ $value }}%)"
-    - alert: heap-usage-too-much
+    - alert: HeapUsageTooMuch
       expr: jvm_memory_bytes_used{job="java", area="heap"} / jvm_memory_bytes_max * 100 > 90
       for: 1m
       labels:
-        severity: red
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} memory usage > 90%"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [heap usage > 90%] for more than 1 minutes. current usage ({{ $value }}%)"
-    - alert: old-gc-time-too-much
+    - alert: OldGCTimeTooMuch
       expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.3
       for: 5m
       labels:
-        severity: yellow
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} Old GC time > 30% running time"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 30% running time] for more than 5 minutes. current seconds ({{ $value }}%)"
-    - alert: old-gc-time-too-much
+    - alert: OldGCTimeTooMuch
       expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.5
       for: 5m
       labels:
-        severity: orange
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} Old GC time > 50% running time"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 50% running time] for more than 5 minutes. current seconds ({{ $value }}%)"
-    - alert: old-gc-time-too-much
+    - alert: OldGCTimeTooMuch
       expr: increase(jvm_gc_collection_seconds_sum{gc="PS MarkSweep"}[5m]) > 5 * 60 * 0.8
       for: 5m
       labels:
-        severity: red
+        severity: warning
       annotations:
         summary: "JVM Instance {{ $labels.instance }} Old GC time > 80% running time"
         description: "{{ $labels.instance }} of job {{ $labels.job }} has been in status [Old GC time > 80% running time] for more than 5 minutes. current seconds ({{ $value }}%)"

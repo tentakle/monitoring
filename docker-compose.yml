@@ -6,10 +6,15 @@ services:
     ports:
       - "9093:9093"
     restart: unless-stopped
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --web.external-url=http://192.168.122.90:9093
     volumes:
     - ./alertmanager:/etc/alertmanager
   alertmanager-bot:
     container_name: alertmanager-bot
+    image: metalmatze/alertmanager-bot:latest
+    restart: unless-stopped
     environment:
       ALERTMANAGER_URL: http://192.168.122.90:9093
       BOLT_PATH: /tmp/bot.db
@@ -20,10 +25,8 @@ services:
       TEMPLATE_PATHS: /templates/default.tmpl
       http_proxy: http://10.69.0.50:3128
       https_proxy: http://10.69.0.50:3128
-    image: metalmatze/alertmanager-bot:latest
     ports:
       - "8080:8080"
-    restart: unless-stopped
     volumes:
     - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl
   blackbox_exporter:

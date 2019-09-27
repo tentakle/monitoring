@@ -5,12 +5,16 @@ services:
     - --path.procfs=/host/proc
     - --path.sysfs=/host/sys
     - --path.rootfs=/rootfs
+    - --collector.systemd
     - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
     container_name: node-exporter
     image: prom/node-exporter:latest
     network_mode: host
+    user: root
     restart: unless-stopped
     volumes:
-    - /proc:/host/proc:rw
-    - /sys:/host/sys:rw
-    - /:/rootfs:rw
+    - /proc:/host/proc
+    - /sys:/host/sys
+    - /:/rootfs
+    - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+    - /run/systemd/private:/run/systemd/private

@@ -1,6 +1,22 @@
 groups:
 - name: Nginx
   rules:
+    - alert: NginxInstanceDown
+      expr: up{job="nginx"} == 0
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Nginx down (instance {{ $labels.instance }})"
+        description: "Nginx unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: NginxMissing
+      expr: absent(up{job="nginx"})
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Nginx is missing (instance {{ $labels.instance }})"
+        description: "Nginx are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: HttpErrors4xx
       expr: sum(rate(nginx_http_requests_total{status=~"^4.."}[1m])) / sum(rate(nginx_http_requests_total[1m])) * 100 > 5
       for: 5m
