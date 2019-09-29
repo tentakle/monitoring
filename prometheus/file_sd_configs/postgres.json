@@ -1,8 +1,14 @@
 [
   {
-    "targets": [ "192.168.122.98:9187" ]
+    "targets": "192.168.122.98:9100",
+    "labels": {
+      "instance": "postgres1"
+    }
   },
   {
-    "targets": [ "192.168.122.230:9187" ]
+    "targets": "192.168.122.230:9100",
+    "labels": {
+      "instance": "postgres2"
+    }
   }
 ]
