@@ -1,0 +1,118 @@
+---   
+lowercaseOutputLabelNames: true
+lowercaseOutputName: true
+rules:
+# Generic gauges with 0-2 labels
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=(\S*)><>Value
+  name: cassandra_$1_$5
+  type: GAUGE
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+
+#
+# Emulate Prometheus 'Summary' metrics for the exported 'Histogram's.
+# TotalLatency is the sum of all latencies since server start
+#
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=(.+)?(?:Total)(Latency)><>Count
+  name: cassandra_$1_$5$6_seconds_sum
+  type: UNTYPED
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+  # Convert microseconds to seconds
+  valueFactor: 0.000001
+
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=((?:.+)?(?:Latency))><>Count
+  name: cassandra_$1_$5_seconds_count
+  type: UNTYPED
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=(.+)><>Count
+  name: cassandra_$1_$5_count
+  type: UNTYPED
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=((?:.+)?(?:Latency))><>(\d+)thPercentile
+  name: cassandra_$1_$5_seconds
+  type: GAUGE
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+    quantile: "0.$6"
+  # Convert microseconds to seconds
+  valueFactor: 0.000001
+
+- pattern: org.apache.cassandra.metrics<type=(\S*)(?:, ((?!scope)\S*)=(\S*))?(?:, scope=(\S*))?, name=(.+)><>(\d+)thPercentile
+  name: cassandra_$1_$5
+  type: GAUGE
+  labels:
+    "$1": "$4"
+    "$2": "$3"
+    quantile: "0.$6"
+- pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+-\w+)-(\d+)\"><>(\w+):'
+  name: tomcat_$3_total
+  labels:
+    port: "$2"
+    protocol: "$1"
+  help: Tomcat global $3
+  type: COUNTER
+- pattern: 'Catalina<j2eeType=Servlet, WebModule=//([-a-zA-Z0-9+&@#/%?=~_|!:.,;]*[-a-zA-Z0-9+&@#/%=~_|]), name=([-a-zA-Z0-9+/$%~_-|!.]*), J2EEApplication=none, J2EEServer=none><>(requestCount|maxTime|processingTime|errorCount):'
+  name: tomcat_servlet_$3_total
+  labels:
+    module: "$1"
+    servlet: "$2"
+  help: Tomcat servlet $3 total
+  type: COUNTER
+- pattern: 'Catalina<type=ThreadPool, name="(\w+-\w+)-(\d+)"><>(currentThreadCount|currentThreadsBusy|keepAliveCount|pollerThreadCount|connectionCount):'
+  name: tomcat_threadpool_$3
+  labels:
+    port: "$2"
+    protocol: "$1"
+  help: Tomcat threadpool $3
+  type: GAUGE
+- pattern: 'Catalina<type=Manager, host=([-a-zA-Z0-9+&@#/%?=~_|!:.,;]*[-a-zA-Z0-9+&@#/%=~_|]), context=([-a-zA-Z0-9+/$%~_-|!.]*)><>(processingTime|sessionCounter|rejectedSessions|expiredSessions):'
+  name: tomcat_session_$3_total
+  labels:
+    context: "$2"
+    host: "$1"
+  help: Tomcat session $3 total
+  type: COUNTER
+- pattern: 'Catalina<type=Server><>serverInfo: (.+)'
+  name: tomcat_serverinfo
+  value: 1
+  labels:
+    serverInfo: "$1"
+  type: COUNTER
+- pattern: 'Catalina<type=GlobalRequestProcessor, name=\"(\w+-\w+)-(\d+)\"><>(\w+):'
+  name: tomcat_$3_total
+  labels:
+    port: "$2"
+    protocol: "$1"
+  help: Tomcat global $3
+  type: COUNTER
+- pattern: 'Catalina<j2eeType=Servlet, WebModule=//([-a-zA-Z0-9+&@#/%?=~_|!:.,;]*[-a-zA-Z0-9+&@#/%=~_|]), name=([-a-zA-Z0-9+/$%~_-|!.]*), J2EEApplication=none, J2EEServer=none><>(requestCount|processingTime|errorCount):'
+  name: tomcat_servlet_$3_total
+  labels:
+    module: "$1"
+    servlet: "$2"
+  help: Tomcat servlet $3 total
+  type: COUNTER
+- pattern: 'Catalina<type=ThreadPool, name="(\w+-\w+)-(\d+)"><>(currentThreadCount|currentThreadsBusy|keepAliveCount|connectionCount|acceptCount|acceptorThreadCount|pollerThreadCount|maxThreads|minSpareThreads):'
+  name: tomcat_threadpool_$3
+  labels:
+    port: "$2"
+    protocol: "$1"
+  help: Tomcat threadpool $3
+  type: GAUGE
+- pattern: 'Catalina<type=Manager, host=([-a-zA-Z0-9+&@#/%?=~_|!:.,;]*[-a-zA-Z0-9+&@#/%=~_|]), context=([-a-zA-Z0-9+/$%~_-|!.]*)><>(processingTime|sessionCounter|rejectedSessions|expiredSessions):'
+  name: tomcat_session_$3_total
+  labels:
+    context: "$2"
+    host: "$1"
+  help: Tomcat session $3 total
+  type: COUNTER   

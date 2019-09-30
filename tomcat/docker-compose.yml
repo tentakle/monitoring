@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  tomcat:
+    container_name: tomcat
+    image: tomcat:latest
+    restart: unless-stopped
+    environment:
+      CATALINA_OPTS: -javaagent:/jmx_exporter/jmx_prometheus_javaagent-0.12.0.jar=6060:/jmx_exporter/tomcat.yml
+    volumes:
+      - ./jmx_exporter:/jmx_exporter
+    ports:
+      - "6060:6060"
+      - "8888:8080"

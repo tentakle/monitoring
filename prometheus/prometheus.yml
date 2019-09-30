@@ -72,13 +72,30 @@ scrape_configs:
       - target_label: __address__
         replacement: 192.168.122.90:9115
 
-  - job_name: icmp
+  - job_name: ssh_banner
     metrics_path: /probe
     params:
-      module: [icmp]
+      module: [ssh_banner]
     file_sd_configs:
       - files:
-        - file_sd_configs/icmp.json
+        - file_sd_configs/ssh_banner.json 
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: (.*)(:.*)?
+        replacement: ${1}:22
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 192.168.122.90:9115
+
+  - job_name: icmp_test
+    metrics_path: /probe
+    params:
+      module: [icmp_test]
+    file_sd_configs:
+      - files:
+        - file_sd_configs/icmp_test.json
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target

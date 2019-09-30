@@ -126,3 +126,14 @@ groups:
       annotations:
         summary: "SystemD service failed (instance {{ $labels.instance }})"
         description: "Service {{ $labels.name }} failed\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: JobRestarting
+      expr: avg without(instance)(changes(process_start_time_seconds[1h])) > 3 
+      for: 10m
+      labels:
+        severity: ticket
+      annotations:
+        summary: "Job restarting (instance {{ $labels.instance }})"
+        description: "Job {{ $labels.name }} restarting\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ProcessNearFDLimits
+      expr: process_open_fds / process_max_fds > 0.8
+      for: 10m

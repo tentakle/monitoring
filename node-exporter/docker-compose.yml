@@ -6,6 +6,7 @@ services:
     - --path.sysfs=/host/sys
     - --path.rootfs=/rootfs
     - --collector.systemd
+    - --collector.textfile.directory=/rootfs/var/lib/node_exporter/textfile_collector
     - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
     container_name: node-exporter
     image: prom/node-exporter:latest

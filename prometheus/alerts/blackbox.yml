@@ -35,7 +35,7 @@ groups:
         description: "HTTP status code is not 200-399\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: SslCertificateWillExpireSoon
       expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 30
-      for: 5m
+      for: 10m
       labels:
         severity: warning
       annotations:
@@ -43,7 +43,7 @@ groups:
         description: "SSL certificate expires in 30 days\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: SslCertificateHasExpired
       expr: probe_ssl_earliest_cert_expiry - time()  <= 0
-      for: 5m
+      for: 10m
       labels:
         severity: error
       annotations:
