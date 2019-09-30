@@ -1,12 +1,12 @@
 [
   {
-    "targets": "192.168.122.98:8404",
+    "targets": ["192.168.122.98:8404"],
     "labels": {
       "instance": "haproxy1"
     }
   },
   {
-    "targets": "192.168.122.230:8404",
+    "targets": ["192.168.122.230:8404"],
     "labels": {
       "instance": "haproxy2"
     }

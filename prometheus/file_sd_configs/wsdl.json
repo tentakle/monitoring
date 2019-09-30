@@ -1,18 +1,18 @@
 [
   {
-    "targets": "http://172.31.1.148:8484/edokf-esb-aisbpek-edo/alive?wsdl",
+    "targets": ["http://172.31.1.148:8484/edokf-esb-aisbpek-edo/alive?wsdl"],
     "labels": {
       "instance": "wsdl1"
     }
   },
   {
-    "targets": "http://172.31.1.150:8484/edokf-esb-aisbpek-edo/alive?wsdl",
+    "targets": ["http://172.31.1.150:8484/edokf-esb-aisbpek-edo/alive?wsdl"],
     "labels": {
       "instance": "wsdl2"
     }
   },
   {
-    "targets": "http://172.31.1.150:5010/edokf-esb-integration-services/requestNsi?wsdl",
+    "targets": ["http://172.31.1.150:5010/edokf-esb-integration-services/requestNsi?wsdl"],
     "labels": {
       "instance": "wsdl3"
     }
