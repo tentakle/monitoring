@@ -5,7 +5,7 @@ services:
     - --path.procfs=/host/proc
     - --path.sysfs=/host/sys
     - --path.rootfs=/rootfs
-    - --collector.systemd
+      #    - --collector.systemd
     - --collector.textfile.directory=/rootfs/var/lib/node_exporter/textfile_collector
     - --collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)
     container_name: node-exporter
@@ -17,5 +17,5 @@ services:
     - /proc:/host/proc
     - /sys:/host/sys
     - /:/rootfs
-    - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
-    - /run/systemd/private:/run/systemd/private
+      #    - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
+      #    - /run/systemd/private:/run/systemd/private

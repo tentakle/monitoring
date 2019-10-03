@@ -17,13 +17,8 @@ groups:
       annotations:
         summary: "Node is missing (instance {{ $labels.instance }})"
         description: "Node are unhealthy\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
-    - alert: DiskWillFillIn4Hours
-      expr: predict_linear(node_filesystem_free_bytes{job="node"}[1h], 4 * 3600) < 0
-      for: 5m
-      labels:
-        severity: page
     - alert: OutOfMemory
-      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      expr: (node_memory_MemTotal_bytes{job="node"} - (node_memory_MemFree_bytes{job="node"} + node_memory_Buffers_bytes{job="node"} + node_memory_Cached_bytes{job="node"})) / (node_memory_MemTotal_bytes{job="node"}) * 100 < 10
       for: 5m
       labels:
         severity: warning
@@ -63,15 +58,23 @@ groups:
         summary: "Unusual disk write rate (instance {{ $labels.instance }})"
         description: "Disk is probably writing too much data (> 50 MB/s)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: OutOfDiskSpace
-      expr: node_filesystem_free_bytes{mountpoint ="/rootfs"} / node_filesystem_size_bytes{mountpoint ="/rootfs"} * 100 < 10
+      expr: node_filesystem_free_bytes{job="node",mountpoint="/"} / node_filesystem_size_bytes{job="node",mountpoint="/"} * 100 < 10
       for: 5m
       labels:
         severity: warning
       annotations:
         summary: "Out of disk space (instance {{ $labels.instance }})"
         description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: DiskWillFillIn4Hours
+      expr: predict_linear(node_filesystem_free_bytes{job="node",mountpoint="/"}[1h], 4 * 3600) < 0
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Disk will fill in 4 hours (instance {{ $labels.instance }})"
+        description: "Disk will fill in 4 hours\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: OutOfInodes
-      expr: node_filesystem_files_free{mountpoint ="/rootfs"} / node_filesystem_files{mountpoint ="/rootfs"} * 100 < 10
+      expr: node_filesystem_files_free{job="node",mountpoint ="/"} / node_filesystem_files{job="node",mountpoint ="/"} * 100 < 10
       for: 5m
       labels:
         severity: warning
@@ -95,7 +98,7 @@ groups:
         summary: "Unusual disk write latency (instance {{ $labels.instance }})"
         description: "Disk latency is growing (write operations > 100ms)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: HighCpuLoad
-      expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+      expr: 100 - (avg by (instance) (irate(node_cpu_seconds_total{job="node",mode="idle"}[5m])) * 100) > 80
       for: 5m
       labels:
         severity: warning

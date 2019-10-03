@@ -16,5 +16,11 @@
     "labels": {
       "instance": "node3"
     }
+  },
+  {
+    "targets": ["10.69.0.50:9100"],
+    "labels": {
+      "instance": "main"
+    }
   }
 ]
