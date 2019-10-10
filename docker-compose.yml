@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 services:
   alertmanager:
     container_name: alertmanager
@@ -13,7 +13,7 @@ services:
     image: metalmatze/alertmanager-bot:latest
     restart: unless-stopped
     environment:
-      ALERTMANAGER_URL: http://192.168.122.90:9093
+      ALERTMANAGER_URL: http://10.69.0.200:9093
       BOLT_PATH: /tmp/bot.db
       LISTEN_ADDR: 0.0.0.0:8080
       STORE: bolt
@@ -23,7 +23,7 @@ services:
       http_proxy: http://10.69.0.50:3128
       https_proxy: http://10.69.0.50:3128
     ports:
-      - "8080:8080"
+      - "18080:8080"
     volumes:
     - ./alertmanager-bot/templates/default.tmpl:/templates/default.tmpl
   blackbox_exporter:
@@ -35,14 +35,14 @@ services:
     volumes:
     - ./blackbox_exporter/config.yml:/etc/blackbox_exporter/config.yml
   grafana:
-    container_name: grafana
+    container_name: grafana2
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     image: grafana/grafana:latest
     ports:
-      - "3000:3000"
+      - "13000:3000"
     restart: unless-stopped
-    user: '1000'
+    user: root
     volumes:
     - ./grafana:/var/lib/grafana
   prometheus:
@@ -52,11 +52,12 @@ services:
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
       - --web.console.libraries=/usr/share/prometheus/console_libraries
       - --web.console.templates=/usr/share/prometheus/consoles
-      - --web.external-url=http://192.168.122.90:9090
+      - --web.external-url=http://10.69.0.200:19090
     ports:
-      - "9090:9090"
+      - "19090:9090"
     volumes:
     - ./prometheus:/etc/prometheus
   snmp_exporter:
@@ -65,10 +66,3 @@ services:
     ports:
       - "9116:9116"
     restart: unless-stopped
-  loki:
-    container_name: loki
-    image: grafana/loki:latest
-    restart: unless-stopped
-    ports:
-      - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml

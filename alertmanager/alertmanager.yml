@@ -9,7 +9,7 @@ receivers:
 - name: 'alertmananger-bot'
   webhook_configs:
   - send_resolved: true
-    url: 'http://192.168.122.90:8080'
+    url: 'http://10.69.0.200:18080'
 
 inhibit_rules:
   - source_match:

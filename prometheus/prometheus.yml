@@ -17,10 +17,11 @@ scrape_configs:
       - files:
         - file_sd_configs/prometheus.json
 
-  - job_name: loki
+  - job_name: kafka
+    metrics_path: /
     file_sd_configs:
       - files:
-        - file_sd_configs/loki.json
+        - file_sd_configs/kafka.json
 
   - job_name: blackbox
     file_sd_configs:
@@ -70,7 +71,7 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 192.168.122.90:9115
+        replacement: 10.69.0.200:9115
 
   - job_name: icmp_test
     metrics_path: /probe
@@ -85,7 +86,7 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 192.168.122.90:9115
+        replacement: 10.69.0.200:9115
 
   - job_name: snmp
     metrics_path: /snmp
@@ -100,4 +101,4 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: 192.168.122.90:9116
+        replacement: 10.69.0.200:9116
