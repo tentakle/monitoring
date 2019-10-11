@@ -26,13 +26,21 @@ groups:
         summary: "Container killed (instance {{ $labels.instance }})"
         description: "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: ContainerCpuUsage
-      expr: (sum(rate(container_cpu_usage_seconds_total[3m])) by (ip, name) * 100) > 80
+      expr: (sum(rate(container_cpu_usage_seconds_total{image!=""}[3m])) by (name) * 100) > 80
       for: 5m
       labels:
         severity: warning
       annotations:
-        summary: "Container CPU usage (instance {{ $labels.instance }})"
+        summary: "Container CPU usage (name {{ $labels.name }})"
         description: "Container CPU usage is above 80%\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+    - alert: ContainerCPUThrottling
+      expr: sum(rate(container_cpu_cfs_throttled_seconds_total[1h])) by (name) > .025
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Container CPU throttled (name {{ $labels.name }})"
+        description: "Container CPU throttled\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
     - alert: ContainerMemoryUsage
       expr: (sum(container_memory_usage_bytes) by (instance) / sum(container_memory_max_usage_bytes) by (instance) * 100) > 80
       for: 5m

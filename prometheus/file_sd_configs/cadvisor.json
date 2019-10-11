@@ -1,8 +1,8 @@
 [
   {
-    "targets": ["192.168.122.90:8081"],
+    "targets": ["10.69.0.200:18081"],
     "labels": {
-      "instance": "cadvisor1"
+      "instance": "10.69.0.200"
     }
   }
 ]
