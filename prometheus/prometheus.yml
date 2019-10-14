@@ -1,5 +1,5 @@
 global:
-  scrape_interval: 5s
+  scrape_interval: 15s
   evaluation_interval: 15s
 
 alerting:
@@ -9,7 +9,12 @@ alerting:
       - file_sd_configs/alertmanagers.json
 
 rule_files:
-  - alerts/*.yml
+  - records/rules.yml
+  - alerts/blackbox.yml
+  - alerts/cadvisor.yml
+  - alerts/kafka.yml
+  - alerts/node.yml
+  - alerts/prometheus.yml
 
 scrape_configs:
   - job_name: prometheus
@@ -58,10 +63,10 @@ scrape_configs:
       - files:
         - file_sd_configs/postgres.json
 
-  - job_name: http_2xx
+  - job_name: http_body_match_origin
     metrics_path: /probe
     params:
-      module: [http_2xx]
+      module: [http_body_match_origin]
     file_sd_configs:
       - files:
         - file_sd_configs/http_2xx.json

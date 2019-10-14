@@ -1,9 +1,18 @@
 modules:
   http_2xx:
     prober: http
-    timeout: 5s
+    timeout: 1m
     http:
-      preferred_ip_protocol: ip4
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
+  http_body_match_origin:
+    prober: http
+    timeout: 1m
+    http:
+      fail_if_body_not_matches_regexp:
+        - "О компании"
+      preferred_ip_protocol: "ip4"
+      ip_protocol_fallback: false
   http_post_2xx:
     prober: http
     timeout: 5s

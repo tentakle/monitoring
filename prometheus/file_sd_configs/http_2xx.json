@@ -1,12 +1,6 @@
 [
   {
     "targets": [
-      "fincom.gov.spb.ru",
-      "fincom.gov.spb.ru/admin",
-      "tvoybudget.spb.ru",
-      "www.aisa.ru",
-      "edo.fincom.gov.spb.ru",
-      "hd.fincom.gov.spb.ru",
       "www.unicardtech.ru"
     ]
   }
